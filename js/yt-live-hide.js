@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Hide livestreams on youtube
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -12,8 +12,11 @@
 (function() {
     'use strict';
 
-    // Self-restrict to youtube domains
+    // Self-restrict to youtube domains, but not watch video pages
     if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) {
+        return;
+    }
+    if (window.location.href.includes('watch?v=')) {
         return;
     }
 
