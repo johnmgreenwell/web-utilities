@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Hide livestreams on youtube
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -63,10 +63,16 @@
         });
     }
 
+    // Throttle function (minimal implementation)
+    function throttle(fn) {
+        let running;
+        return () => !running && (running = true, setTimeout(() => (fn(), running = false), 100));
+    }
+
     hideElements();
 
-    // Also handle dynamically loaded content
-    const observer = new MutationObserver(hideElements);
+    // Handle dynamically loaded content with throttling
+    const observer = new MutationObserver(throttle(hideElements));
     observer.observe(document.body, {
         childList: true,
         subtree: true
