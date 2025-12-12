@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.2
-// @description  Hide livestreams on youtube
-// @author       John Greenwell (adapted)
+// @version      1.3
+// @description  Hide currectly active live videos on youtube subscriptions page
+// @author       John Greenwell (adapted) + modification
 // @match        *://youtube.com/*
 // @match        *://www.youtube.com/*
 // @grant        none
@@ -31,35 +31,6 @@
 
         document.querySelectorAll(liveSelectors).forEach(element => {
             element.style.display = 'none';
-        });
-
-        // Stream selectors
-        const vodSelectors = [
-            'ytd-rich-item-renderer',
-            'ytd-grid-video-renderer',
-            'ytd-compact-video-renderer',
-            'ytd-item-section-renderer',
-            'ytd-video-renderer'
-        ].map(tag => `${tag}:has([aria-label*="Streamed"])`).join(', ');
-
-        document.querySelectorAll(vodSelectors).forEach(element => {
-            element.style.display = 'none';
-        });
-
-        // Backup stream selectors
-        const vodBackupSelectors = [
-            'ytd-rich-item-renderer',
-            'ytd-grid-video-renderer',
-            'ytd-compact-video-renderer',
-            'ytd-item-section-renderer',
-            'ytd-video-renderer'
-        ].map(tag => `${tag}:not(:has([aria-label*="Streamed"]))`).join(', ');
-
-        document.querySelectorAll(vodBackupSelectors).forEach(element => {
-            const metadata = element.querySelector('#metadata-line > span:last-of-type, .yt-content-metadata-view-model__metadata-row:last-of-type');
-            if (metadata && metadata.textContent.includes('Streamed')) {
-                element.style.display = 'none';
-            }
         });
     }
 
