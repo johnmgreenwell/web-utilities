@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  Hide currectly active live videos on youtube subscriptions page
+// @version      1.6
+// @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
 // @match        *://www.youtube.com/*
@@ -16,35 +16,53 @@
     if (window.location.href.includes('watch?v=')) return;
 
     function hideElements() {
-        const liveSelectors = [
-            // Common container elements
+        const containers = [
             'ytd-rich-item-renderer',
             'ytd-grid-video-renderer',
             'ytd-compact-video-renderer',
-            'ytd-item-section-renderer',
-            'ytd-video-renderer'
-        ].map(tag => `${tag}:has(
-            [badge-style-type-live-now],                      /* Common live badge class */
-            .badge-style-type-live-now-alternate,             /* Old alternate */
-            .badge-style-type-live,                           /* Variant without alternate */
-            ytd-badge-supported-renderer span:contains(LIVE), /* Case-sensitive LIVE */
-            ytd-badge-supported-renderer span:contains(Live), /* Capitalized Live */
-            #live-badge,                                      /* Direct live badge ID/class */
-            .yt-spec-avatar-shape--live-ring,                 /* Old ring (kept as fallback) */
-            img[alt="LIVE"],                                  /* Overlay images */
-            [overlay-style="LIVE"]                            /* Overlay attribute for live */
-        )`).join(', ');
+            'ytd-video-renderer',
+            'ytd-item-section-renderer'
+        ];
 
-        // Additional broad fallback for red "LIVE" overlays or pulsing dots
-        const extraSelector = 'ytd-thumbnail-overlay-now-playing-equalizer, ' +
-                              'ytd-thumbnail:has(a[href*="live"]), ' +
-                              '[id="thumbnail"]:has([src*="live"]), ' +
-                              ':has-text(LIVE), :has-text(Live), :has-text(●)';
+        // Starting query selector
+        const candidates = document.querySelectorAll(containers.map(tag => tag).join(', '));
 
-        document.querySelectorAll(liveSelectors + ', ' + extraSelector).forEach(element => {
-            let target = element.closest('ytd-rich-item-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer, ytd-video-renderer');
-            if (target) target.style.display = 'none';
-            else element.style.display = 'none';
+        candidates.forEach(element => {
+            let isLive = false;
+
+            // Common live badge classes
+            if (element.querySelector('[badge-style-type-live-now], .badge-style-type-live-now-alternate, .badge-style-type-live, #live-badge')) {
+                isLive = true;
+            }
+
+            // LIVE text in badges/overlays
+            const badgeTexts = element.querySelectorAll('ytd-badge-supported-renderer span, .ytd-video-renderer span');
+            for (const span of badgeTexts) {
+                if (span.textContent.trim().toUpperCase() === 'LIVE') {
+                    isLive = true;
+                    break;
+                }
+            }
+
+            // Live overlay attributes or images
+            if (element.querySelector('[overlay-style="LIVE"], img[alt="LIVE"], ytd-thumbnail-overlay-now-playing-equalizer')) {
+                isLive = true;
+            }
+
+            // Links containing /live or pulsing indicators
+            const links = element.querySelectorAll('a[href*="live"], a[href^="/live"]');
+            if (links.length > 0) {
+                isLive = true;
+            }
+
+            // Old ring fallback
+            if (element.querySelector('.yt-spec-avatar-shape--live-ring')) {
+                isLive = true;
+            }
+
+            if (isLive) {
+                element.style.display = 'none';
+            }
         });
     }
 
