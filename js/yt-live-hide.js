@@ -12,6 +12,7 @@
 (function() {
     'use strict';
 
+    // Halt script immediately when not required
     if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) return;
     if (window.location.href.includes('watch?v=')) return;
 
