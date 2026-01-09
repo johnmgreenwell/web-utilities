@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -67,7 +67,7 @@
         });
     }
 
-    function throttle(fn, delay = 200) {
+    function throttle(fn, delay = 300) {
         let running = false;
         return () => {
             if (!running) {
