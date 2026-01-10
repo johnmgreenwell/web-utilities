@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -32,7 +32,12 @@
             let isLive = false;
 
             // Common live badge classes
-            if (element.querySelector('[badge-style-type-live-now], .badge-style-type-live-now-alternate, .badge-style-type-live, #live-badge')) {
+            if (element.querySelector('.badge-style-type-live-now-alternate.ytd-badge-supported-renderer')) {
+                isLive = true;
+            }
+
+            if (element.querySelector('[badge-style-type-live-now], .badge-style-type-live-now-alternate, \
+                    .badge-style-type-live-now-alternate.ytd-badge-supported-renderer, .badge-style-type-live, #live-badge')) {
                 isLive = true;
             }
 
