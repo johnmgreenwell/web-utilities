@@ -37,7 +37,8 @@
             }
 
             if (element.querySelector('[badge-style-type-live-now], .badge-style-type-live-now-alternate, \
-                    .badge-style-type-live-now-alternate.ytd-badge-supported-renderer, .badge-style-type-live, #live-badge')) {
+                    .badge-style-type-live-now-alternate.ytd-badge-supported-renderer, \
+                    .badge-style-type-live, #live-badge')) {
                 isLive = true;
             }
 
