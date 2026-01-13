@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.9
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -28,44 +28,13 @@
         // Starting query selector
         const candidates = document.querySelectorAll(containers.map(tag => tag).join(', '));
 
+        // Compact query selector elements
         candidates.forEach(element => {
-            let isLive = false;
-
-            // Common live badge classes
-            if (element.querySelector('.badge-style-type-live-now-alternate.ytd-badge-supported-renderer')) {
-                isLive = true;
-            }
-
-            if (element.querySelector('[badge-style-type-live-now], .badge-style-type-live-now-alternate, \
-                    .badge-style-type-live-now-alternate.ytd-badge-supported-renderer, \
-                    .badge-style-type-live, #live-badge')) {
-                isLive = true;
-            }
-
-            // LIVE text in badges/overlays
-            const badgeTexts = element.querySelectorAll('ytd-badge-supported-renderer span, .ytd-video-renderer span');
-            for (const span of badgeTexts) {
-                if (span.textContent.trim().toUpperCase() === 'LIVE') {
-                    isLive = true;
-                    break;
-                }
-            }
-
-            // Live overlay attributes or images
-            if (element.querySelector('[overlay-style="LIVE"], img[alt="LIVE"], ytd-thumbnail-overlay-now-playing-equalizer')) {
-                isLive = true;
-            }
-
-            // Links containing /live or pulsing indicators
-            const links = element.querySelectorAll('a[href*="live"], a[href^="/live"]');
-            if (links.length > 0) {
-                isLive = true;
-            }
-
-            // Old ring fallback
-            if (element.querySelector('.yt-spec-avatar-shape--live-ring')) {
-                isLive = true;
-            }
+            const isLive =
+                element.querySelector('.yt-badge-shape__text')?.textContent.trim().toUpperCase() === 'LIVE' ||
+                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate') ||
+                [...element.querySelectorAll('span')].some(span => 
+                    span.textContent.trim().toUpperCase() === 'LIVE');
 
             if (isLive) {
                 element.style.display = 'none';
