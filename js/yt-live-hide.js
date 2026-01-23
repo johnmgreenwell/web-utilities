@@ -30,13 +30,16 @@
 
         // Compact query selector elements
         candidates.forEach(element => {
-            const isLive =
-                element.querySelector('.yt-badge-shape__text')?.textContent.trim().toUpperCase() === 'LIVE' ||
+            const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.trim().toUpperCase();
+            const isExcluded =
+                badgeText === 'LIVE' ||
+                badgeText === 'UPCOMING' ||
+                badgeText.includes('PREMIER') ||
                 element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate') ||
                 [...element.querySelectorAll('span')].some(span => 
                     span.textContent.trim().toUpperCase() === 'LIVE');
 
-            if (isLive) {
+            if (isExcluded) {
                 element.style.display = 'none';
             }
         });
