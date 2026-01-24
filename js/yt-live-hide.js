@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.10
+// @version      1.11
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -26,15 +26,16 @@
         ];
 
         // Starting query selector
-        const candidates = document.querySelectorAll(containers.map(tag => tag).join(', '));
+        const candidates = document.querySelectorAll(containers.join(', '));
 
         // Compact query selector elements
         candidates.forEach(element => {
-            const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.trim().toUpperCase();
+            const badge = element.querySelector('.yt-badge-shape__text');
+            const badgeText = badge ? badge.textContent.trim().toUpperCase() : '';
             const isExcluded =
-                badgeText === 'LIVE' ||
-                badgeText === 'UPCOMING' ||
-                badgeText.includes('PREMIER') ||
+                badgeText.includes('LIVE') ||
+                badgeText.includes('UPCOM') ||
+                badgeText.includes('PREM') ||
                 element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate') ||
                 element.querySelector('span.yt-core-attributed-string[aria-label*="live"]') ||
                 element.querySelector('span:has-text("LIVE")');
