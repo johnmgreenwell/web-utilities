@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.11
+// @version      1.12
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -25,24 +25,14 @@
             'ytd-item-section-renderer'
         ];
 
-        // Starting query selector
-        const candidates = document.querySelectorAll(containers.join(', '));
-
         // Compact query selector elements
-        candidates.forEach(element => {
-            const badge = element.querySelector('.yt-badge-shape__text');
-            const badgeText = badge ? badge.textContent.trim().toUpperCase() : '';
+        document.querySelectorAll(containers.join(', ')).forEach(element => {
+            const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.toUpperCase() || '';
             const isExcluded =
-                badgeText.includes('LIVE') ||
-                badgeText.includes('UPCOM') ||
-                badgeText.includes('PREM') ||
-                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate') ||
-                element.querySelector('span.yt-core-attributed-string[aria-label*="live"]') ||
-                element.querySelector('span:has-text("LIVE")');
+                /LIVE|UPCOM|PREM/.test(badgeText) ||
+                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate, span[aria-label*="live" i], span:has-text("LIVE")');
 
-            if (isExcluded) {
-                element.style.display = 'none';
-            }
+            if (isExcluded) element.style.display = 'none';
         });
     }
 
