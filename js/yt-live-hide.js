@@ -16,6 +16,7 @@
     if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) return;
     if (window.location.href.includes('watch?v=')) return;
 
+    // Collect and exclude using compact query selector elements
     function hideElements() {
         const containers = [
             'ytd-rich-item-renderer',
@@ -25,7 +26,6 @@
             'ytd-item-section-renderer'
         ];
 
-        // Compact query selector elements
         document.querySelectorAll(containers.join(', ')).forEach(element => {
             const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.toUpperCase() || '';
             const isExcluded =
@@ -36,6 +36,7 @@
         });
     }
 
+    // Limit operational load
     function throttle(fn, delay = 500) {
         let running = false;
         return () => {
@@ -46,8 +47,8 @@
         };
     }
 
+    // Hide elements and observe for dyanmic page content
     hideElements();
-
     const observer = new MutationObserver(throttle(hideElements));
     observer.observe(document.body, { childList: true, subtree: true });
 })();
