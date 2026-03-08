@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.13
+// @version      1.14
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -27,10 +27,13 @@
         ];
 
         document.querySelectorAll(containers.join(', ')).forEach(element => {
+            if (element.style.display === 'none') return;
+
+            // Check badge text and specific YouTube live CSS classes
             const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.toUpperCase() || '';
             const isExcluded =
-                /LIVE|UPCOM|PREM/.test(badgeText) ||
-                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate, span[aria-label*="live" i], span:has-text("LIVE")');
+                /\b(LIVE|UPCOMING|PREMIERE)\b/.test(badgeText) ||
+                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate, span[aria-label*="live" i]');
 
             if (isExcluded) element.style.display = 'none';
         });
@@ -47,7 +50,7 @@
         };
     }
 
-    // Hide elements and observe for dyanmic page content
+    // Execute and maintain observation for dynamic page content
     hideElements();
     const observer = new MutationObserver(throttle(hideElements));
     observer.observe(document.body, { childList: true, subtree: true });
