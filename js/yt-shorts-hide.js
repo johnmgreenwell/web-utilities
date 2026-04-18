@@ -1,20 +1,18 @@
 // ==UserScript==
 // @name         yt-shorts-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.1
-// @description  Hide Youtube Shorts on subscriptions page and homepage
+// @version      1.2
+// @description  Hide youtube shorts on the subscriptions page
 // @author       John Greenwell (adapted)
-// @match        *://youtube.com/*
-// @match        *://www.youtube.com/*
+// @match        *://www.youtube.com/feed/subscriptions
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    // Halt script immediately when not required
-    if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) return;
-    if (window.location.href.includes('watch?v=')) return;
+    // Only allow script to run on the scubscriptions page
+    if (window.location.pathname !== '/feed/subscriptions') return;
 
     // Collect and exclude using compact query selector elements
     function hideElements() {
