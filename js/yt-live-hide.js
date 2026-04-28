@@ -12,12 +12,11 @@
 (function() {
     'use strict';
 
-    // Halt script immediately when not required
+    // Collect and exclude using compact query selector elements
+    function hideElements() {
     if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) return;
     if (window.location.href.includes('watch?v=')) return;
 
-    // Collect and exclude using compact query selector elements
-    function hideElements() {
         const containers = [
             'ytd-rich-item-renderer',
             'ytd-grid-video-renderer',
@@ -54,6 +53,7 @@
     hideElements();
     const observer = new MutationObserver(throttle(hideElements));
     observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('yt-navigate-finish', hideElements);
 })();
 
 // EOF
