@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.14
+// @version      1.15
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        *://youtube.com/*
@@ -38,22 +38,20 @@
         });
     }
 
-    // Limit operational load
+    // Limit operational load (Fixed: now captures trailing edge changes)
     function throttle(fn, delay = 500) {
-        let running = false;
+        let timeoutId = null;
         return () => {
-            if (!running) {
-                running = true;
-                setTimeout(() => { fn(); running = false; }, delay);
-            }
+            if (timeoutId) return;
+            timeoutId = setTimeout(() => { fn(); timeoutId = null; }, delay);
         };
     }
 
     // Execute and maintain observation for dynamic page content
-    hideElements();
-    const observer = new MutationObserver(throttle(hideElements));
-    observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener('yt-navigate-finish', hideElements);
+    const run = throttle(hideElements);
+    run();
+    new MutationObserver(run).observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener('yt-navigate-finish', run);
 })();
 
 // EOF
