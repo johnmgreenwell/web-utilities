@@ -4,8 +4,7 @@
 // @version      1.15
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
-// @match        *://youtube.com/*
-// @match        *://www.youtube.com/*
+// @match        *://www.youtube.com/feed/subscriptions
 // @grant        none
 // ==/UserScript==
 
