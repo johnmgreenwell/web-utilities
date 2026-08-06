@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.15
+// @version      1.16
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
-// @match        *://www.youtube.com/feed/subscriptions
+// @match        https://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -13,8 +13,7 @@
 
     // Collect and exclude using compact query selector elements
     function hideElements() {
-    if (!window.location.hostname.match(/^(www\.)?youtube\.com$/)) return;
-    if (window.location.href.includes('watch?v=')) return;
+        if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
         const containers = [
             'ytd-rich-item-renderer',
@@ -37,20 +36,25 @@
         });
     }
 
-    // Limit operational load (Fixed: now captures trailing edge changes)
-    function throttle(fn, delay = 500) {
-        let timeoutId = null;
-        return () => {
+    // Limit operational load
+    function throttle(fn, delay = 300) {
+        let timeoutId = null, lastArgs = null;
+        return function wrapper(...args) {
+            lastArgs = args;
             if (timeoutId) return;
-            timeoutId = setTimeout(() => { fn(); timeoutId = null; }, delay);
+            timeoutId = setTimeout(() => {
+                timeoutId = null;
+                fn.apply(this, lastArgs);
+            }, delay);
         };
     }
 
-    // Execute and maintain observation for dynamic page content
+    // Execute and maintain observation
     const run = throttle(hideElements);
     run();
     new MutationObserver(run).observe(document.documentElement, { childList: true, subtree: true });
     window.addEventListener('yt-navigate-finish', run);
+    window.addEventListener('popstate', run);
 })();
 
 // EOF
