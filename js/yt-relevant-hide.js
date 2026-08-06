@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         yt-relevant-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Hide youtube most relevant section on youtube subscriptions page
 // @author       John Greenwell (adapted)
-// @match        *://www.youtube.com/feed/subscriptions
+// @match        https://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -13,7 +13,7 @@
 
     // Collect and exclude using query selector elements
     const hideMostRelevant = () => {
-        if (window.location.pathname !== '/feed/subscriptions') return;
+        if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
         // Expanded selectors to handle YouTube's varied subscription shelf structures
         const spans = document.querySelectorAll('span#title, #title.ytd-rich-shelf-renderer, #title.ytd-shelf-renderer');
@@ -29,20 +29,25 @@
         });
     };
 
-    // Limit operational load (Fixed: now captures trailing edge changes)
-    function throttle(fn, delay = 500) {
-        let timeoutId = null;
-        return () => {
+    // Limit operational load
+    function throttle(fn, delay = 300) {
+        let timeoutId = null, lastArgs = null;
+        return function wrapper(...args) {
+            lastArgs = args;
             if (timeoutId) return;
-            timeoutId = setTimeout(() => { fn(); timeoutId = null; }, delay);
+            timeoutId = setTimeout(() => {
+                timeoutId = null;
+                fn.apply(this, lastArgs);
+            }, delay);
         };
     }
 
-    // Execute and maintain observation for dynamic page content
+    // Execute and maintain observation
     const run = throttle(hideMostRelevant);
     run();
     new MutationObserver(run).observe(document.documentElement, { childList: true, subtree: true });
     window.addEventListener('yt-navigate-finish', run);
+    window.addEventListener('popstate', run);
 })();
 
 // EOF
