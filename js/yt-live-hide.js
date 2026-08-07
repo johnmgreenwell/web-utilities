@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.16
+// @version      1.17
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    // Collect and exclude using compact query selector elements
+    // Collect and exclude using query selector elements
     function hideElements() {
         if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
@@ -26,11 +26,17 @@
         document.querySelectorAll(containers.join(', ')).forEach(element => {
             if (element.style.display === 'none') return;
 
-            // Check badge text and specific YouTube live CSS classes
-            const badgeText = element.querySelector('.yt-badge-shape__text')?.textContent.toUpperCase() || '';
+            const badgeText = element.querySelector('.yt-badge-shape__text, .badge-shape-wiz__text, ytd-badge-supported-renderer')?.textContent.toUpperCase() || '';
+            const hasActiveAria = element.querySelector('[aria-label*="live now" i], [aria-label*="is live" i], [aria-label*="upcoming" i], [aria-label*="premiere" i]');
+            const hasLiveOverlay = element.querySelector('ytd-thumbnail-overlay-time-status-renderer');
+            const hasWatchingText = /\bwatching\b/i.test(element.textContent);
+
             const isExcluded =
                 /\b(LIVE|UPCOMING|PREMIERE)\b/.test(badgeText) ||
-                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate, span[aria-label*="live" i]');
+                element.querySelector('.badge-style-type-live-now, .badge-style-type-live-now-alternate, .yt-spec-avatar-shape--live-ring, ytd-thumbnail-overlay-badge-renderer') ||
+                hasActiveAria ||
+                hasWatchingText ||
+                (hasLiveOverlay && /^LIVE$/i.test(hasLiveOverlay.textContent.trim()));
 
             if (isExcluded) element.style.display = 'none';
         });
