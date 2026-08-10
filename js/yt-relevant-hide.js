@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-relevant-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Hide youtube most relevant section on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -15,11 +15,15 @@
     const hideMostRelevant = () => {
         if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
-        // Expanded selectors to handle YouTube's varied subscription shelf structures
-        const spans = document.querySelectorAll('span#title, #title.ytd-rich-shelf-renderer, #title.ytd-shelf-renderer');
+        const spans = document.querySelectorAll(
+            'span#title:not([data-live-checked]), ' +
+            '#title.ytd-rich-shelf-renderer:not([data-live-checked]), ' +
+            '#title.ytd-shelf-renderer:not([data-live-checked])'
+        );
 
         // Focus the container for the target shelf and eliminate elements
         spans.forEach(span => {
+            span.dataset.liveChecked = 'true';
             if (span.textContent.trim() === "Most relevant") {
                 const shelf = span.closest('ytd-shelf-renderer, ytd-rich-section-renderer, ytd-rich-shelf-renderer');
                 if (shelf && shelf.style.display !== 'none') {
