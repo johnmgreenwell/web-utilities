@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-shorts-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.5
+// @version      1.6
 // @description  Hide youtube shorts and section title on the subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -11,11 +11,11 @@
 (function() {
     'use strict';
 
-    // Collect and exclude all by using compact query selector elements
+    // Collect and exclude using query selector elements
     function hideElements() {
         if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
-        // 1. Hide entire Shorts shelves/sections
+        // Hide entire shorts shelves/sections
         const shelves = document.querySelectorAll('ytd-rich-section-renderer, ytd-rich-shelf-renderer');
         shelves.forEach(shelf => {
             const titleText = shelf.querySelector('#title')?.textContent.trim();
@@ -24,7 +24,7 @@
             }
         });
 
-        // 2. Hide stray individual Shorts elements
+        // Hide stray individual shorts elements
         const containers = [
             'ytd-rich-item-renderer',
             'ytd-grid-video-renderer',
@@ -34,7 +34,9 @@
         ];
 
         document.querySelectorAll(containers.join(', ')).forEach(element => {
-            if (element.style.display === 'none') return;
+            // Skip elements already checked or hidden
+            if (element.dataset.liveChecked === 'true' || element.style.display === 'none') return;
+            element.dataset.liveChecked = 'true';
 
             const isShort =
                 element.querySelector('a[href*="/shorts/"], [href*="/shorts/"]') ||
