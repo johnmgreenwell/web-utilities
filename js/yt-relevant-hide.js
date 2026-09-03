@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-relevant-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  Hide youtube most relevant section on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -11,15 +11,17 @@
 (function() {
     'use strict';
 
+    const SPAN_SELECTOR = [
+        'span#title:not([data-live-checked])',
+        '#title.ytd-rich-shelf-renderer:not([data-live-checked])',
+        '#title.ytd-shelf-renderer:not([data-live-checked])'
+    ].join(', ');
+
     // Collect and exclude using query selector elements
     const hideMostRelevant = () => {
         if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
-        const spans = document.querySelectorAll(
-            'span#title:not([data-live-checked]), ' +
-            '#title.ytd-rich-shelf-renderer:not([data-live-checked]), ' +
-            '#title.ytd-shelf-renderer:not([data-live-checked])'
-        );
+        const spans = document.querySelectorAll(SPAN_SELECTOR);
 
         // Focus the container for the target shelf and eliminate elements
         spans.forEach(span => {
@@ -33,15 +35,14 @@
         });
     };
 
-    // Limit operational load
+    // Rate-limit operational load
     function throttle(fn, delay = 300) {
-        let timeoutId = null, lastArgs = null;
+        let timeoutId = null;
         return function wrapper(...args) {
-            lastArgs = args;
-            if (timeoutId) return;
+            if (timeoutId) clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
                 timeoutId = null;
-                fn.apply(this, lastArgs);
+                fn.apply(this, args);
             }, delay);
         };
     }
