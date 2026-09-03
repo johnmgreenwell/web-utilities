@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-live-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.18
+// @version      1.19
 // @description  Hide currently active live videos on youtube subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -11,19 +11,19 @@
 (function() {
     'use strict';
 
+    const CONTAINER_SELECTOR = [
+        'ytd-rich-item-renderer',
+        'ytd-grid-video-renderer',
+        'ytd-compact-video-renderer',
+        'ytd-video-renderer',
+        'ytd-item-section-renderer'
+    ].join(', ');
+
     // Collect and exclude using query selector elements
     function hideElements() {
         if (!window.location.pathname.startsWith('/feed/subscriptions')) return;
 
-        const containers = [
-            'ytd-rich-item-renderer',
-            'ytd-grid-video-renderer',
-            'ytd-compact-video-renderer',
-            'ytd-video-renderer',
-            'ytd-item-section-renderer'
-        ];
-
-        document.querySelectorAll(containers.join(', ')).forEach(element => {
+        document.querySelectorAll(CONTAINER_SELECTOR).forEach(element => {
             // Skip elements already checked or hidden
             if (element.dataset.liveChecked === 'true' || element.style.display === 'none') return;
             element.dataset.liveChecked = 'true';
@@ -44,15 +44,14 @@
         });
     }
 
-    // Limit operational load
+    // Rate-limit operational load
     function throttle(fn, delay = 300) {
-        let timeoutId = null, lastArgs = null;
+        let timeoutId = null;
         return function wrapper(...args) {
-            lastArgs = args;
-            if (timeoutId) return;
+            if (timeoutId) clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
                 timeoutId = null;
-                fn.apply(this, lastArgs);
+                fn.apply(this, args);
             }, delay);
         };
     }
