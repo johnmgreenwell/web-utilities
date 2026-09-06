@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         yt-shorts-hide
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  Hide youtube shorts and section title on the subscriptions page
 // @author       John Greenwell (adapted)
 // @match        https://www.youtube.com/*
@@ -52,15 +52,25 @@
         });
     }
 
-    // Rate-limit operational load
+    // Rate-limit operational load with leading-edge operation
     function throttle(fn, delay = 300) {
         let timeoutId = null;
+        let lastExecTime = 0;
+
         return function wrapper(...args) {
-            if (timeoutId) clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                timeoutId = null;
+            const now = Date.now();
+            const elapsed = now - lastExecTime;
+
+            if (elapsed >= delay) {
+                lastExecTime = now;
                 fn.apply(this, args);
-            }, delay);
+            } else if (!timeoutId) {
+                timeoutId = setTimeout(() => {
+                    lastExecTime = Date.now();
+                    timeoutId = null;
+                    fn.apply(this, args);
+                }, delay - elapsed);
+            }
         };
     }
 
